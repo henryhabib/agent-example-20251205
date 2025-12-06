@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Bitcoin Price — Real-time</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; background:#0b1020; color:#e6eef8 }
+      .card { background:#0f1724; padding:24px 28px; border-radius:12px; box-shadow:0 6px 24px rgba(2,6,23,.6); text-align:center }
+      .price { font-size:48px; font-weight:700; margin:8px 0 }
+      .meta { font-size:14px; color:#9fb0d4 }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div>Bitcoin (BTC)</div>
+      <div id="price" class="price">—</div>
+      <div id="meta" class="meta">connecting…</div>
+    </div>
+
+    <script>
+      const priceEl = document.getElementById('price')
+      const metaEl = document.getElementById('meta')
+
+      function fmtPrice(p) {
+        if (p === null || p === undefined) return '—'
+        return '$' + Number(p).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})
+      }
+
+      const es = new EventSource('/stream')
+      es.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data)
+          priceEl.textContent = fmtPrice(data.price)
+          if (data.time) {
+            const d = new Date(data.time * 1000)
+            metaEl.textContent = 'updated ' + d.toLocaleTimeString()
+          } else {
+            metaEl.textContent = 'waiting for first price…'
+          }
+        } catch (err) {
+          metaEl.textContent = 'error parsing data'
+        }
+      }
+      es.onerror = () => { metaEl.textContent = 'connection lost, retrying…' }
+    </script>
+  </body>
+</html>
