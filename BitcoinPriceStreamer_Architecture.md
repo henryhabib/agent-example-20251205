@@ -1560,7 +1560,7 @@ graph TB
 - Implement retry logic with exponential backoff
 - Add comprehensive error logging
 - Create health check endpoints
-- Set up basic monitoring (uptim monitoring)
+- Set up basic monitoring (uptime monitoring)
 - Process supervision (systemd, supervisord)
 
 **Phase 3:**
