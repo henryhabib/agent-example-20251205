@@ -51,6 +51,10 @@
       }
 
       function startStreaming() {
+        // Close any existing connection before creating a new one
+        if (eventSource) {
+          eventSource.close()
+        }
         eventSource = new EventSource('/stream')
         eventSource.onmessage = (e) => {
           try {
