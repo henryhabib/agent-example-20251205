@@ -1,10 +1,11 @@
 import json
 import time
 import threading
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, session, request, jsonify
 import requests
 
 app = Flask(__name__)
+app.secret_key = 'bitcoin-price-secret-key-2024'  # For session management
 
 # Shared state for latest price
 latest = {"price": None, "time": None}
@@ -39,8 +40,22 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/verify_password", methods=["POST"])
+def verify_password():
+    """Verify the password and set session if correct."""
+    data = request.get_json()
+    password = data.get("password", "")
+    if password == "test":
+        session["authenticated"] = True
+        return jsonify({"success": True})
+    return jsonify({"success": False})
+
+
 @app.route("/stream")
 def stream():
+    """Stream price data only if authenticated."""
+    if not session.get("authenticated"):
+        return Response("Unauthorized", status=401)
     return Response(event_stream(), mimetype="text/event-stream")
 
 
