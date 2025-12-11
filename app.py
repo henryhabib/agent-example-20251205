@@ -1,10 +1,11 @@
 import json
 import time
 import threading
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request, redirect, url_for, session, flash
 import requests
 
 app = Flask(__name__)
+app.secret_key = 'dev-secret-key-change-in-production'
 
 # Shared state for latest price
 latest = {"price": None, "time": None}
@@ -36,11 +37,28 @@ def event_stream():
 
 @app.route("/")
 def index():
+    if not session.get("authenticated"):
+        return redirect(url_for("login"))
     return render_template("index.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        password = request.form.get("password")
+        if password == "test":
+            session["authenticated"] = True
+            flash("Hooray!", "success")
+            return redirect(url_for("index"))
+        else:
+            flash("Incorrect password", "error")
+    return render_template("login.html")
 
 
 @app.route("/stream")
 def stream():
+    if not session.get("authenticated"):
+        return Response("Unauthorized", status=401)
     return Response(event_stream(), mimetype="text/event-stream")
 
 
