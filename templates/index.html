@@ -9,9 +9,18 @@
       .card { background:#0f1724; padding:24px 28px; border-radius:12px; box-shadow:0 6px 24px rgba(2,6,23,.6); text-align:center }
       .price { font-size:48px; font-weight:700; margin:8px 0 }
       .meta { font-size:14px; color:#9fb0d4 }
+      .alert { position:fixed; top:20px; right:20px; background:#48bb78; color:white; padding:16px 24px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.3); font-weight:500; animation:slideIn .3s ease-out }
+      @keyframes slideIn { from { transform:translateX(100%); opacity:0 } to { transform:translateX(0); opacity:1 } }
     </style>
   </head>
   <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert" id="alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     <div class="card">
       <div>Bitcoin (BTC)</div>
       <div id="price" class="price">—</div>
@@ -19,6 +28,15 @@
     </div>
 
     <script>
+      // Auto-hide alert after 3 seconds
+      const alertEl = document.getElementById('alert')
+      if (alertEl) {
+        setTimeout(() => {
+          alertEl.style.animation = 'slideIn .3s ease-out reverse'
+          setTimeout(() => alertEl.remove(), 300)
+        }, 3000)
+      }
+
       const priceEl = document.getElementById('price')
       const metaEl = document.getElementById('meta')
 
